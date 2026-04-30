@@ -36,6 +36,50 @@ async function bulkCreateChildren(children) {
   return results;
 }
 
+function normalizeValue(v) {
+  return (v == null ? '' : String(v)).trim().toLowerCase();
+}
+
+function makeDuplicateKey({ firstName, lastName, className, guardianPhone }) {
+  return [
+    normalizeValue(firstName),
+    normalizeValue(lastName),
+    normalizeValue(className),
+    normalizeValue(guardianPhone),
+  ].join('|');
+}
+
+async function bulkCreateChildrenSkippingExisting(children) {
+  const existing = await listChildren();
+  const seen = new Set(
+    (existing || []).map((c) =>
+      makeDuplicateKey({
+        firstName: c.first_name,
+        lastName: c.last_name,
+        className: c.class_name,
+        guardianPhone: c.guardian_phone,
+      }),
+    ),
+  );
+
+  const created = [];
+  const skipped = [];
+
+  for (const c of children || []) {
+    const key = makeDuplicateKey(c);
+    if (seen.has(key)) {
+      skipped.push(c);
+      continue;
+    }
+    // eslint-disable-next-line no-await-in-loop
+    const inserted = await createChild(c);
+    created.push(inserted);
+    seen.add(key);
+  }
+
+  return { created, skipped };
+}
+
 async function listChildren() {
   const { rows } = await query('SELECT * FROM children ORDER BY id ASC', []);
   return rows;
@@ -133,6 +177,7 @@ async function deleteChild(id) {
 module.exports = {
   createChild,
   bulkCreateChildren,
+  bulkCreateChildrenSkippingExisting,
   listChildren,
   findChildById,
   findChildByQrPayload,

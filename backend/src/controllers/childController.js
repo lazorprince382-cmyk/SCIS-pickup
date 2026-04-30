@@ -4,6 +4,7 @@ const multer = require('multer');
 const {
   createChild,
   bulkCreateChildren,
+  bulkCreateChildrenSkippingExisting,
   listChildren,
   findChildById,
   findChildByQrPayload,
@@ -78,8 +79,47 @@ async function importChildrenCsv(req, res) {
     });
   }
 
-  const imported = await bulkCreateChildren(children);
-  return res.json({ success: true, importedCount: imported.length, children: imported });
+  const result = await bulkCreateChildrenSkippingExisting(children);
+  return res.json({
+    success: true,
+    importedCount: result.created.length,
+    skippedCount: result.skipped.length,
+    children: result.created,
+  });
+}
+
+async function importChildrenJson(req, res) {
+  const rows = req.body && Array.isArray(req.body.rows) ? req.body.rows : null;
+  if (!rows || rows.length === 0) {
+    return res.status(400).json({ error: 'rows array is required' });
+  }
+
+  const children = rows
+    .map((r) => {
+      const fullName = (r.fullName || '').trim();
+      const [firstName, ...rest] = fullName.split(/\s+/).filter(Boolean);
+      const lastName = rest.join(' ');
+      return {
+        externalId: (r.externalId || '').trim() || null,
+        firstName: (r.firstName || firstName || '').trim(),
+        lastName: (r.lastName || lastName || '').trim(),
+        className: (r.className || r.year || '').trim() || null,
+        guardianPhone: (r.guardianPhone || r.contact1 || '').trim() || null,
+      };
+    })
+    .filter((c) => c.firstName && c.lastName);
+
+  if (children.length === 0) {
+    return res.status(400).json({ error: 'No valid learners found. Each row needs at least first and last name.' });
+  }
+
+  const result = await bulkCreateChildrenSkippingExisting(children);
+  return res.json({
+    success: true,
+    importedCount: result.created.length,
+    skippedCount: result.skipped.length,
+    children: result.created,
+  });
 }
 
 async function getChildren(req, res) {
@@ -251,6 +291,7 @@ module.exports = {
   csvUploadMiddleware,
   registerWithPickersUpload,
   importChildrenCsv,
+  importChildrenJson,
   getChildren,
   createSingleChild,
   registerChildWithPickers,

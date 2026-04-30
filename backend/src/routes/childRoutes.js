@@ -3,6 +3,7 @@ const {
   csvUploadMiddleware,
   registerWithPickersUpload,
   importChildrenCsv,
+  importChildrenJson,
   getChildren,
   createSingleChild,
   registerChildWithPickers,
@@ -24,6 +25,7 @@ const router = express.Router();
 
 // Admin-only
 router.post('/import', authMiddleware, requireAdmin, csvUploadMiddleware(), importChildrenCsv);
+router.post('/import-json', authMiddleware, requireAdmin, importChildrenJson);
 router.get('/', authMiddleware, requireAdmin, getChildren);
 router.post('/', authMiddleware, requireAdmin, createSingleChild);
 router.put('/:id', authMiddleware, requireAdmin, updateChildById);

@@ -112,6 +112,9 @@
   // Children & QR
   const registerChildForm = document.getElementById('register-child-form');
   const registerChildStatus = document.getElementById('register-child-status');
+  const excelImportInput = document.getElementById('excel-import-input');
+  const excelImportBtn = document.getElementById('excel-import-btn');
+  const excelImportStatus = document.getElementById('excel-import-status');
   const childFullNameInput = document.getElementById('child-full-name-input');
   const childClassInput = document.getElementById('child-class-input');
   const childParentPhoneInput = document.getElementById('child-parent-phone-input');
@@ -344,6 +347,91 @@
       setStatus(registerChildStatus, 'Network error while registering child.', 'error');
     }
   });
+
+  function normalizeHeaderKey(key) {
+    return (key || '').toString().trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+
+  function pickValue(row, candidates) {
+    if (!row) return '';
+    const keys = Object.keys(row);
+    for (const candidate of candidates) {
+      const normalizedCandidate = normalizeHeaderKey(candidate);
+      const foundKey = keys.find((k) => normalizeHeaderKey(k) === normalizedCandidate);
+      if (foundKey && row[foundKey] != null && String(row[foundKey]).trim() !== '') {
+        return String(row[foundKey]).trim();
+      }
+    }
+    return '';
+  }
+
+  function mapExcelRows(rawRows) {
+    return (rawRows || [])
+      .map((row) => {
+        const fullName = pickValue(row, ['studentname', 'fullname', 'name']);
+        const className = pickValue(row, ['class', 'classname', 'year']);
+        const guardianPhone = pickValue(row, ['contact1', 'guardianphone', 'parentphone', 'phone']);
+        const externalId = pickValue(row, ['externalid', 'studentid', 'id']);
+        return { fullName, className, guardianPhone, externalId };
+      })
+      .filter((r) => r.fullName);
+  }
+
+  async function importLearnersFromExcel() {
+    if (!excelImportInput || !excelImportInput.files || !excelImportInput.files[0]) {
+      setStatus(excelImportStatus, 'Choose an Excel file first.', 'error');
+      return;
+    }
+    if (typeof XLSX === 'undefined') {
+      setStatus(excelImportStatus, 'Excel parser failed to load. Refresh and try again.', 'error');
+      return;
+    }
+
+    const file = excelImportInput.files[0];
+    setStatus(excelImportStatus, 'Reading Excel file...', 'info');
+    try {
+      const buffer = await file.arrayBuffer();
+      const workbook = XLSX.read(buffer, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) {
+        setStatus(excelImportStatus, 'Excel file has no sheets.', 'error');
+        return;
+      }
+      const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: '' });
+      const mappedRows = mapExcelRows(rows);
+      if (mappedRows.length === 0) {
+        setStatus(excelImportStatus, 'No valid learners found. Check columns like Student Name, Class/Year, Contact #1.', 'error');
+        return;
+      }
+
+      setStatus(excelImportStatus, `Importing ${mappedRows.length} learner(s)...`, 'info');
+      const resp = await fetch('/api/children/import-json', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ rows: mappedRows }),
+      });
+      const json = await resp.json();
+      if (!resp.ok) {
+        setStatus(excelImportStatus, json.error || 'Excel import failed.', 'error');
+        return;
+      }
+
+      const importedCount = Number(json.importedCount || 0);
+      const skippedCount = Number(json.skippedCount || 0);
+      await loadChildren();
+      switchTab('qr-codes');
+      renderQrGrid(currentChildren);
+      setStatus(excelImportStatus, `Imported ${importedCount}, skipped ${skippedCount}. QRs generated in the QR tab.`, 'success');
+      excelImportInput.value = '';
+    } catch (err) {
+      console.error(err);
+      setStatus(excelImportStatus, 'Could not read/import the Excel file.', 'error');
+    }
+  }
+
+  if (excelImportBtn) {
+    excelImportBtn.addEventListener('click', importLearnersFromExcel);
+  }
 
   let currentChildren = [];
 

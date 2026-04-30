@@ -14,6 +14,7 @@
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   </head>
   <body>
     <div class="app">
@@ -136,6 +137,20 @@
                 </div>
               </form>
               <div class="status" id="register-child-status"></div>
+          </div>
+          <div class="card">
+            <h2>Import learners from Excel</h2>
+            <p class="small">Upload `.xlsx` / `.xls`. Existing learners are skipped automatically, and QR cards are generated immediately after import.</p>
+            <div class="grid">
+              <div class="full-width">
+                <label for="excel-import-input">Excel file</label>
+                <input id="excel-import-input" type="file" accept=".xlsx,.xls,.csv" />
+              </div>
+            </div>
+            <div class="mt">
+              <button class="btn-primary" id="excel-import-btn" type="button">Import learners & generate QRs</button>
+            </div>
+            <div class="status" id="excel-import-status"></div>
           </div>
         </section>
 
