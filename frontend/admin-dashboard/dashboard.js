@@ -124,6 +124,7 @@
   const holderPhoto4 = document.getElementById('holder-photo-4');
   const refreshChildrenBtn = document.getElementById('refresh-children-btn');
   const generateQrBtn = document.getElementById('generate-qr-btn');
+  const downloadAllQrBtn = document.getElementById('download-all-qr-btn');
   const qrGrid = document.getElementById('qr-grid');
   const childrenTableBody = document.getElementById('children-table-body');
 
@@ -470,7 +471,7 @@
         headers: { Authorization: 'Bearer ' + getToken() },
       });
       const children = await resp.json();
-      currentChildren = children || [];
+      currentChildren = dedupeChildrenByNamePhone(children || []);
       qrGridHiddenIds = new Set((children || []).filter((c) => c && c.qr_hidden === true).map((c) => Number(c.id)));
       updateChildrenFilterClassOptions();
       updateQrFilterClassOptions();
@@ -490,6 +491,20 @@
       firstName: trimmed.slice(0, firstSpace).trim(),
       lastName: trimmed.slice(firstSpace + 1).trim(),
     };
+  }
+
+  function learnerName(child) {
+    return `${(child.first_name || '').trim()} ${(child.last_name || '').trim()}`.trim();
+  }
+
+  function dedupeChildrenByNamePhone(children) {
+    const byKey = new Map();
+    (children || []).forEach((child) => {
+      if (!child || child.id == null) return;
+      const key = `${learnerName(child).toLowerCase()}|${(child.guardian_phone || '').trim().toLowerCase()}`;
+      if (!byKey.has(key)) byKey.set(key, child);
+    });
+    return Array.from(byKey.values());
   }
 
   function downloadQrForChild(child) {
@@ -808,6 +823,24 @@
   generateQrBtn.addEventListener('click', () => {
     renderQrGrid(currentChildren);
   });
+  if (downloadAllQrBtn) {
+    downloadAllQrBtn.addEventListener('click', () => {
+      const visible = (currentChildren || []).filter((c) => c && c.id != null && !qrGridHiddenIds.has(Number(c.id)));
+      const uniqueByName = new Map();
+      visible.forEach((child) => {
+        const nameKey = learnerName(child).toLowerCase();
+        if (!nameKey) return;
+        if (!uniqueByName.has(nameKey)) uniqueByName.set(nameKey, child);
+      });
+      const uniqueChildren = Array.from(uniqueByName.values());
+      if (uniqueChildren.length === 0) {
+        setStatus(registerChildStatus, 'No QR codes to download.', 'error');
+        return;
+      }
+      uniqueChildren.forEach((child) => downloadQrForChild(child));
+      setStatus(registerChildStatus, `Started downloading ${uniqueChildren.length} unique QR code(s).`, 'success');
+    });
+  }
 
   const hiddenQrModal = document.getElementById('hidden-qr-modal');
   const hiddenQrListEl = document.getElementById('hidden-qr-list');

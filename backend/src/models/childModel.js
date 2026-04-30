@@ -40,11 +40,10 @@ function normalizeValue(v) {
   return (v == null ? '' : String(v)).trim().toLowerCase();
 }
 
-function makeDuplicateKey({ firstName, lastName, className, guardianPhone }) {
+function makeDuplicateKey({ firstName, lastName, guardianPhone }) {
   return [
     normalizeValue(firstName),
     normalizeValue(lastName),
-    normalizeValue(className),
     normalizeValue(guardianPhone),
   ].join('|');
 }
@@ -56,7 +55,6 @@ async function bulkCreateChildrenSkippingExisting(children) {
       makeDuplicateKey({
         firstName: c.first_name,
         lastName: c.last_name,
-        className: c.class_name,
         guardianPhone: c.guardian_phone,
       }),
     ),
