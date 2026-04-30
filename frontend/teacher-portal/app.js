@@ -185,7 +185,7 @@
     selectedPickerId = null;
     const slots = pickersRow.querySelectorAll('.picker-slot');
     const list = authorizedPickers || [];
-    for (let i = 0; i < 3; i += 1) {
+    for (let i = 0; i < 4; i += 1) {
       const slot = slots[i];
       if (!slot) continue;
       slot.classList.remove('selected');

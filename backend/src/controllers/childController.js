@@ -40,6 +40,7 @@ function registerWithPickersUpload() {
     { name: 'photo1', maxCount: 1 },
     { name: 'photo2', maxCount: 1 },
     { name: 'photo3', maxCount: 1 },
+    { name: 'photo4', maxCount: 1 },
   ]);
 }
 
@@ -127,15 +128,12 @@ async function registerChildWithPickers(req, res) {
   const photo1 = files.photo1 && files.photo1[0];
   const photo2 = files.photo2 && files.photo2[0];
   const photo3 = files.photo3 && files.photo3[0];
-  const photos = [photo1, photo2, photo3].filter(Boolean);
+  const photo4 = files.photo4 && files.photo4[0];
+  const photos = [photo1, photo2, photo3, photo4].filter(Boolean);
 
   if (!fullName.trim()) {
     return res.status(400).json({ error: 'Full name is required' });
   }
-  if (photos.length === 0) {
-    return res.status(400).json({ error: 'At least one holder photo is required' });
-  }
-
   const { firstName, lastName } = parseFullName(fullName);
 
   try {
@@ -196,7 +194,7 @@ async function getChildByQr(req, res) {
       id: child.id,
       fullName: `${child.first_name} ${child.last_name}`,
       className: child.class_name,
-      schoolName: 'The Ocean Of Knowledge School',
+      schoolName: 'Shalom Cambridge International School',
       authorizedPickers,
     });
   } catch (err) {

@@ -2,9 +2,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Admin Dashboard - Attendance</title>
+    <title>Admin Console - Learner Release Security</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#1e40af" />
+    <meta name="theme-color" content="#0f2a56" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <link rel="manifest" href="./manifest.json" />
@@ -19,13 +19,24 @@
     <div class="app">
       <header class="top-header">
         <div class="brand">
-          <img src="./images/ocean-badge.png" alt="The Ocean Of Knowledge School" class="brand-badge" />
+          <img src="./images/shalom-badge.png" alt="Shalom Cambridge International School" class="brand-badge" />
           <div class="brand-text">
-            <div class="brand-name">The Ocean Of Knowledge School</div>
-            <div class="brand-subtitle">Attendance Admin Dashboard</div>
+            <div class="brand-name">Shalom Cambridge International School</div>
+            <div class="brand-subtitle">Learner Release Security Console</div>
           </div>
         </div>
         <div class="header-actions">
+          <button
+            type="button"
+            class="menu-toggle-btn"
+            id="menu-toggle-btn"
+            aria-label="Open menu"
+            aria-controls="admin-side-menu"
+            aria-expanded="false"
+            title="Menu"
+          >
+            <span aria-hidden="true">☰</span>
+          </button>
           <button type="button" class="theme-toggle" id="theme-toggle-btn" aria-label="Toggle dark mode" title="Dark / Light mode">
             <span class="icon-sun" aria-hidden="true">☀️</span>
             <span class="icon-moon" aria-hidden="true">🌙</span>
@@ -35,7 +46,9 @@
         </div>
       </header>
 
-      <nav class="tabs">
+      <div class="layout-shell">
+      <nav class="tabs" id="admin-side-menu" aria-label="Dashboard sections">
+        <div class="menu-title">Menu</div>
         <div class="tab active" data-tab="register-children">Register children</div>
         <div class="tab" data-tab="qr-codes">QR codes</div>
         <div class="tab" data-tab="all-children">All Children</div>
@@ -44,7 +57,6 @@
         <div class="tab" data-tab="teachers">Teachers</div>
         <div class="tab" data-tab="export">Export</div>
       </nav>
-
       <main>
         <div class="welcome-banner" id="welcome-banner">
           <span class="welcome-text">Welcome back, <span id="welcome-name">—</span>!</span>
@@ -54,17 +66,17 @@
           <div class="card">
             <h2>Register new child</h2>
               <p class="small">
-                Add a learner with their full name, class, parent phone, and three holder photos. The QR code is generated after registration; gate staff will see these photos when scanning.
+                Add a learner with their full name, year, parent phone, and up to four holder photos. Picker photos are optional at registration and can be added later.
               </p>
               <form id="register-child-form">
                 <div class="grid">
                   <div class="full-width">
                     <label for="child-full-name-input">Child’s full name</label>
-                    <input id="child-full-name-input" type="text" placeholder="e.g. John Okello" required />
+                    <input id="child-full-name-input" type="text" placeholder="e.g. Amina Nansubuga" required />
                   </div>
                   <div>
-                    <label for="child-class-input">Class</label>
-                    <input id="child-class-input" type="text" placeholder="e.g. P3" />
+                    <label for="child-class-input">Year</label>
+                    <input id="child-class-input" type="text" placeholder="e.g. Year 3" />
                   </div>
                   <div>
                     <label for="child-parent-phone-input">Parent’s phone number</label>
@@ -106,6 +118,18 @@
                       <button type="button" class="btn-secondary btn-cancel-photo" data-slot="2">Cancel</button>
                     </div>
                   </div>
+                  <div class="full-width register-holder-slot" data-slot="3">
+                    <label>Holder 4 photo <span class="muted">(optional)</span></label>
+                    <div class="holder-register-preview" id="register-holder-preview-3" data-slot="3" role="button" aria-label="Holder 4 photo – drop or choose file"></div>
+                    <div class="holder-register-actions">
+                      <input type="file" id="holder-photo-4" accept="image/*" class="holder-register-file" data-slot="3" />
+                      <button type="button" class="btn-secondary btn-camera" data-slot="3">Take photo</button>
+                    </div>
+                    <div class="holder-register-confirm" id="register-holder-confirm-3" hidden>
+                      <button type="button" class="btn-primary btn-done-photo" data-slot="3">Done</button>
+                      <button type="button" class="btn-secondary btn-cancel-photo" data-slot="3">Cancel</button>
+                    </div>
+                  </div>
                 </div>
                 <div class="mt">
                   <button class="btn-primary" type="submit">Register child</button>
@@ -121,7 +145,7 @@
               <div>
                 <h2>QR codes</h2>
                 <p class="small">
-                  One QR per learner. Gate staff scan it once to see this child and their three holder photos.
+                  One QR per learner. Gate staff scan it once to see this child and their holder photos.
                 </p>
               </div>
               <div class="header-actions">
@@ -137,7 +161,7 @@
               </div>
             </div>
             <div class="small mt">
-              Each learner has a single QR (id + name). Scanning it loads the child and their three photos from the database.
+              Each learner has a single QR (id + name). Scanning it loads the child and their saved holder photos from the database.
             </div>
             <div class="search-filter-bar mt">
               <div class="search-filter-segment search-segment">
@@ -147,7 +171,7 @@
               <div class="search-filter-segment filter-segment">
                 <span class="segment-label">Filter</span>
                 <select id="qr-codes-filter-class" class="segment-select">
-                  <option value="">All classes</option>
+                  <option value="">All years</option>
                 </select>
               </div>
             </div>
@@ -169,7 +193,7 @@
               <div class="search-filter-segment filter-segment">
                 <span class="segment-label">Filter</span>
                 <select id="children-filter-class" class="segment-select">
-                  <option value="">All classes</option>
+                  <option value="">All years</option>
                 </select>
               </div>
             </div>
@@ -179,7 +203,7 @@
                   <tr>
                     <th>ID</th>
                     <th>Full name</th>
-                    <th>Class</th>
+                    <th>Year</th>
                     <th>Parent phone</th>
                     <th>Actions</th>
                   </tr>
@@ -203,7 +227,7 @@
                   <tr>
                     <th>ID</th>
                     <th>Child</th>
-                    <th>Class</th>
+                    <th>Year</th>
                     <th>Teacher</th>
                     <th>Holder who picked</th>
                     <th>Action</th>
@@ -244,7 +268,7 @@
                     <tr>
                       <th>ID</th>
                       <th>Child</th>
-                      <th>Class</th>
+                      <th>Year</th>
                       <th>Teacher</th>
                       <th>Holder who picked</th>
                       <th>Action</th>
@@ -333,6 +357,7 @@
           </div>
         </section>
       </main>
+      </div>
     </div>
 
     <div class="modal-overlay" id="edit-child-modal" aria-hidden="true">
@@ -345,7 +370,7 @@
               <input id="edit-child-full-name" type="text" required />
             </div>
             <div>
-              <label for="edit-child-class">Class</label>
+              <label for="edit-child-class">Year</label>
               <input id="edit-child-class" type="text" />
             </div>
             <div>
@@ -382,6 +407,15 @@
                 <div class="holder-photo-actions">
                   <input type="file" class="holder-replace-input" accept="image/*" data-slot="2" />
                   <button type="button" class="btn-remove-photo" data-slot="2">Remove photo</button>
+                </div>
+              </div>
+              <div class="holder-edit-slot" data-slot="3">
+                <div class="holder-thumb-wrap"><img class="holder-thumb" alt="Holder 4" /></div>
+                <label class="small" for="holder-name-3">Holder 4 name</label>
+                <input type="text" class="holder-name-input" id="holder-name-3" placeholder="e.g. Aisha" data-slot="3" />
+                <div class="holder-photo-actions">
+                  <input type="file" class="holder-replace-input" accept="image/*" data-slot="3" />
+                  <button type="button" class="btn-remove-photo" data-slot="3">Remove photo</button>
                 </div>
               </div>
             </div>

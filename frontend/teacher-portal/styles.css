@@ -6,8 +6,8 @@
 }
 
 :root {
-  --tg-bg: radial-gradient(circle at top left, #0369a1 0, #020617 45%, #020617 100%);
-  --tg-panel-bg: #020617;
+  --tg-bg: radial-gradient(circle at top left, #0ea5e9 0, #0f2a56 45%, #0f2a56 100%);
+  --tg-panel-bg: #0f2a56;
   --tg-panel-border: rgba(148, 163, 184, 0.3);
   --tg-card-bg: rgba(15, 23, 42, 0.8);
   --tg-card-border: rgba(148, 163, 184, 0.4);
@@ -17,30 +17,34 @@
   --tg-overlay-bg: rgba(15, 23, 42, 0.9);
   --tg-picker-wrap-bg: rgba(15, 23, 42, 0.8);
   --tg-picker-wrap-border: rgba(148, 163, 184, 0.3);
-  --tg-btn-scan-bg: rgba(30, 64, 175, 0.15);
+  --tg-btn-scan-bg: rgba(14, 165, 233, 0.18);
   --tg-btn-scan-border: rgba(148, 163, 184, 0.5);
-  --tg-btn-scan-color: #c7d2fe;
+  --tg-btn-scan-color: #e0f2fe;
   --tg-theme-toggle-bg: rgba(15, 23, 42, 0.6);
   --tg-theme-toggle-color: #f9fafb;
+  --tg-accent-red: #dc2626;
+  --tg-soft-black: #111827;
 }
 
 html[data-theme="light"] {
-  --tg-bg: linear-gradient(180deg, #e0e7ff 0%, #f5f3ff 40%, #faf5ff 100%);
+  --tg-bg: linear-gradient(180deg, #e0f2fe 0%, #fefce8 45%, #fef3c7 100%);
   --tg-panel-bg: #fff;
-  --tg-panel-border: #c4b5fd;
+  --tg-panel-border: #7dd3fc;
   --tg-card-bg: #f8fafc;
-  --tg-card-border: #a5b4fc;
-  --tg-text: #1e1b4b;
+  --tg-card-border: #7dd3fc;
+  --tg-text: #0f2a56;
   --tg-text-muted: #64748b;
   --tg-scan-hint-bg: rgba(255, 255, 255, 0.95);
   --tg-overlay-bg: rgba(255, 255, 255, 0.95);
   --tg-picker-wrap-bg: #f1f5f9;
   --tg-picker-wrap-border: #94a3b8;
-  --tg-btn-scan-bg: rgba(99, 102, 241, 0.15);
-  --tg-btn-scan-border: #818cf8;
-  --tg-btn-scan-color: #3730a3;
+  --tg-btn-scan-bg: rgba(14, 165, 233, 0.12);
+  --tg-btn-scan-border: #0ea5e9;
+  --tg-btn-scan-color: #0f2a56;
   --tg-theme-toggle-bg: rgba(255, 255, 255, 0.3);
   --tg-theme-toggle-color: #fff;
+  --tg-accent-red: #dc2626;
+  --tg-soft-black: #1f2937;
 }
 
 html {
@@ -66,11 +70,11 @@ body {
 
 .top-header {
   padding: 0.9rem 1.1rem;
-  background: linear-gradient(120deg, #6b21a8, #7c3aed);
+  background: linear-gradient(120deg, #0f2a56, #0ea5e9);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 10px 30px rgba(107, 33, 168, 0.4);
+  box-shadow: 0 10px 30px rgba(15, 42, 86, 0.4);
 }
 
 .teacher-brand {
@@ -170,7 +174,7 @@ html[data-theme="dark"] .scanner-container {
   background: radial-gradient(circle at bottom, #0b1120 0, #020617 50%, #020617 100%);
 }
 html[data-theme="light"] .scanner-container {
-  background: linear-gradient(180deg, #e0e7ff 0%, #c7d2fe 50%, #a5b4fc 100%);
+  background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 55%, #fef3c7 100%);
 }
 
 #qr-reader {
@@ -220,11 +224,12 @@ html[data-theme="light"] .scan-hint {
 
 .bottom-panel {
   background: var(--tg-panel-bg);
-  padding: 0.75rem 1rem 1rem;
+  padding: 0.8rem 1rem 1rem;
   border-top: 1px solid var(--tg-panel-border);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.65rem;
+  box-shadow: 0 -8px 20px rgba(17, 24, 39, 0.12);
   transition: background 0.35s ease, border-color 0.25s ease;
 }
 
@@ -264,6 +269,7 @@ html[data-theme="light"] .scan-hint {
   border-radius: 0.75rem;
   background: var(--tg-card-bg);
   border: 1px solid var(--tg-card-border);
+  box-shadow: 0 4px 14px rgba(17, 24, 39, 0.1);
   font-size: 0.86rem;
   transition: background 0.25s ease, border-color 0.25s ease;
 }
@@ -289,7 +295,7 @@ html[data-theme="light"] .scan-hint {
 }
 
 .authorized-pickers {
-  padding: 0.5rem 0;
+  padding: 0.6rem 0;
   border-top: 1px solid rgba(148, 163, 184, 0.2);
 }
 
@@ -309,12 +315,13 @@ html[data-theme="light"] .scan-hint {
 
 .pickers-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  justify-content: space-between;
+  justify-content: stretch;
 }
 
 .picker-slot {
-  flex: 1;
+  flex: 1 1 calc(50% - 0.5rem);
   text-align: center;
   min-width: 0;
 }
@@ -497,7 +504,7 @@ html[data-theme="light"] .scan-hint {
 }
 
 .btn-emergency-release {
-  background: linear-gradient(to right, #b91c1c, #dc2626);
+  background: linear-gradient(to right, #b91c1c, var(--tg-accent-red));
   color: #fff;
 }
 
@@ -553,7 +560,7 @@ html[data-theme="light"] .scan-hint {
 }
 
 .status-message.error {
-  color: #f97316;
+  color: var(--tg-accent-red);
 }
 
 .status-message.info {

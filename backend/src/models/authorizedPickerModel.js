@@ -2,7 +2,7 @@ const { query } = require('../utils/db');
 
 async function getPickersByChildId(childId) {
   const { rows } = await query(
-    'SELECT * FROM authorized_pickers WHERE child_id = $1 ORDER BY sort_order ASC LIMIT 3',
+    'SELECT * FROM authorized_pickers WHERE child_id = $1 ORDER BY sort_order ASC LIMIT 4',
     [childId]
   );
   return rows;

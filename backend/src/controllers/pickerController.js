@@ -61,8 +61,8 @@ async function addPicker(req, res) {
   if (!child) return res.status(404).json({ error: 'Child not found' });
 
   const existing = await getPickersByChildId(childId);
-  if (existing.length >= 3) {
-    return res.status(400).json({ error: 'Maximum 3 authorized pickers per child' });
+  if (existing.length >= 4) {
+    return res.status(400).json({ error: 'Maximum 4 authorized pickers per child' });
   }
 
   let photoUrl = (req.body && req.body.photoUrl) || '';

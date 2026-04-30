@@ -1,5 +1,8 @@
 (function () {
   const tabs = document.querySelectorAll('.tab');
+  const layoutShell = document.querySelector('.layout-shell');
+  const menuToggleBtn = document.getElementById('menu-toggle-btn');
+  const mobileMenuMedia = window.matchMedia('(max-width: 640px)');
   const sections = {
     'register-children': document.getElementById('tab-register-children'),
     'qr-codes': document.getElementById('tab-qr-codes'),
@@ -52,13 +55,41 @@
     });
   }
 
+  function setMobileMenuOpen(open) {
+    if (!layoutShell) return;
+    layoutShell.classList.toggle('menu-open', !!open);
+    if (menuToggleBtn) {
+      menuToggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      menuToggleBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    }
+  }
+
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       switchTab(tab.dataset.tab);
       if (tab.dataset.tab === 'qr-codes' || tab.dataset.tab === 'all-children') loadChildren();
       if (tab.dataset.tab === 'history') loadHistoryDates();
       if (tab.dataset.tab === 'export') loadExportHistoryDates();
+      if (mobileMenuMedia.matches) setMobileMenuOpen(false);
     });
+  });
+
+  if (menuToggleBtn) {
+    menuToggleBtn.addEventListener('click', () => {
+      const isOpen = layoutShell && layoutShell.classList.contains('menu-open');
+      setMobileMenuOpen(!isOpen);
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!mobileMenuMedia.matches) return;
+    if (!layoutShell || !layoutShell.classList.contains('menu-open')) return;
+    const clickedInsideMenu = e.target.closest('#admin-side-menu') || e.target.closest('#menu-toggle-btn');
+    if (!clickedInsideMenu) setMobileMenuOpen(false);
+  });
+
+  mobileMenuMedia.addEventListener('change', (evt) => {
+    if (!evt.matches) setMobileMenuOpen(false);
   });
 
   function setStatus(el, msg, type) {
@@ -87,14 +118,15 @@
   const holderPhoto1 = document.getElementById('holder-photo-1');
   const holderPhoto2 = document.getElementById('holder-photo-2');
   const holderPhoto3 = document.getElementById('holder-photo-3');
+  const holderPhoto4 = document.getElementById('holder-photo-4');
   const refreshChildrenBtn = document.getElementById('refresh-children-btn');
   const generateQrBtn = document.getElementById('generate-qr-btn');
   const qrGrid = document.getElementById('qr-grid');
   const childrenTableBody = document.getElementById('children-table-body');
 
-  const registerHolderBlobs = [null, null, null];
-  const registerPendingUrls = [null, null, null];
-  const registerPendingSource = [null, null, null];
+  const registerHolderBlobs = [null, null, null, null];
+  const registerPendingUrls = [null, null, null, null];
+  const registerPendingSource = [null, null, null, null];
 
   function getRegisterPreviewEl(slotIndex) {
     return document.getElementById('register-holder-preview-' + slotIndex);
@@ -276,10 +308,7 @@
     const p1 = registerHolderBlobs[0];
     const p2 = registerHolderBlobs[1];
     const p3 = registerHolderBlobs[2];
-    if (!p1 && !p2 && !p3) {
-      setStatus(registerChildStatus, 'Add at least one holder photo and click Done to confirm.', 'error');
-      return;
-    }
+    const p4 = registerHolderBlobs[3];
     const formData = new FormData();
     formData.append('fullName', (childFullNameInput.value || '').trim());
     formData.append('class', (childClassInput.value || '').trim());
@@ -287,6 +316,7 @@
     if (p1) formData.append('photo1', p1, 'holder-1.jpg');
     if (p2) formData.append('photo2', p2, 'holder-2.jpg');
     if (p3) formData.append('photo3', p3, 'holder-3.jpg');
+    if (p4) formData.append('photo4', p4, 'holder-4.jpg');
     try {
       setStatus(registerChildStatus, 'Registering child...', 'info');
       const resp = await fetch('/api/children/register-with-pickers', {
@@ -306,7 +336,8 @@
       holderPhoto1.value = '';
       holderPhoto2.value = '';
       holderPhoto3.value = '';
-      for (let i = 0; i < 3; i++) clearRegisterSlot(i);
+      if (holderPhoto4) holderPhoto4.value = '';
+      for (let i = 0; i < 4; i++) clearRegisterSlot(i);
       await loadChildren();
     } catch (err) {
       console.error(err);
@@ -411,7 +442,7 @@
     if (!sel) return;
     const current = sel.value;
     const classes = getUniqueClasses(currentChildren);
-    sel.innerHTML = '<option value="">All classes</option>' + classes.map((cls) => `<option value="${escapeHtml(cls)}">${escapeHtml(cls)}</option>`).join('');
+    sel.innerHTML = '<option value="">All years</option>' + classes.map((cls) => `<option value="${escapeHtml(cls)}">${escapeHtml(cls)}</option>`).join('');
     if (classes.includes(current)) sel.value = current;
     else {
       childrenFilterClass = '';
@@ -426,7 +457,7 @@
     if (!sel) return;
     const current = sel.value;
     const classes = getUniqueClasses(currentChildren);
-    sel.innerHTML = '<option value="">All classes</option>' + classes.map((cls) => `<option value="${escapeHtml(cls)}">${escapeHtml(cls)}</option>`).join('');
+    sel.innerHTML = '<option value="">All years</option>' + classes.map((cls) => `<option value="${escapeHtml(cls)}">${escapeHtml(cls)}</option>`).join('');
     if (classes.includes(current)) sel.value = current;
     else {
       qrGridFilterClass = '';
@@ -849,8 +880,8 @@
             nameInput.value = displayName;
           }
         });
-        // Always show all 3 slots so user can add the third holder if they only had 2
-        for (let i = sorted.length; i < 3; i++) {
+        // Always show all 4 slots so user can add missing holders later
+        for (let i = sorted.length; i < 4; i++) {
           if (!slots[i]) continue;
           const wrap = slots[i].querySelector('.holder-thumb-wrap');
           const thumb = slots[i].querySelector('.holder-thumb');

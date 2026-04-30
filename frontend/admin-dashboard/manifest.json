@@ -1,11 +1,11 @@
 {
-  "name": "Attendance Admin",
+  "name": "Learner Release Security",
   "short_name": "Admin",
-  "description": "The Ocean Of Knowledge School - Attendance Admin Dashboard",
+  "description": "Shalom Cambridge International School - Learner Release Security Console",
   "start_url": "/admin/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#ffffff",
-  "theme_color": "#1e40af",
+  "theme_color": "#0f2a56",
   "icons": []
 }
