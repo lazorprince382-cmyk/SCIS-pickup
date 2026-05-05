@@ -352,6 +352,14 @@ button {
   color: #fff;
 }
 
+.btn-small {
+  min-height: 34px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+  border-radius: 0.55rem;
+  line-height: 1.15;
+}
+
 .required-dot {
   font-size: 0.75rem;
   color: var(--text-secondary, #6b7280);
@@ -687,6 +695,23 @@ html[data-theme="dark"] .btn-delete-qr:hover {
 
   .two-column {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .children-list-card table {
+    font-size: 0.75rem;
+  }
+
+  .children-list-card th,
+  .children-list-card td {
+    padding: 0.3rem 0.2rem;
+  }
+
+  .children-list-card td:last-child .btn-small {
+    min-height: 30px;
+    min-width: 86px;
+    padding: 0.22rem 0.5rem;
+    font-size: 0.72rem;
+    border-radius: 0.45rem;
   }
 }
 
@@ -1105,6 +1130,16 @@ html[data-theme="dark"] .btn-remove-photo {
 .children-list-card .table-wrap {
   max-height: 320px;
   overflow: auto;
+}
+
+.children-list-card td:last-child {
+  min-width: 165px;
+}
+
+.children-list-card td:last-child .btn-small {
+  min-width: 96px;
+  margin: 0.1rem 0.1rem 0.1rem 0;
+  white-space: nowrap;
 }
 
 .qr-codes-card .qr-grid-wrap {
