@@ -4,10 +4,24 @@
     <meta charset="UTF-8" />
     <title>Admin Console - Learner Release Security</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <meta name="theme-color" content="#0f2a56" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <link rel="manifest" href="/admin/manifest.json" />
+    <script>
+      (function () {
+        try {
+          var path = location.pathname.replace(/\/index\.html$/i, '').replace(/\/$/, '') || '/';
+          if (path !== '/admin') return;
+          if (!localStorage.getItem('authToken')) {
+            location.replace('/admin/login.html');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="stylesheet" href="/admin/styles.css" />
     <script>
       (function(){try{var t=localStorage.getItem('attendance-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);else document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
@@ -20,7 +34,7 @@
     <div class="app">
       <header class="top-header">
         <div class="brand">
-          <img src="/admin/images/shalom-badge.png" alt="Shalom Cambridge International School" class="brand-badge" />
+          <img src="/admin/images/shalom-badge.svg" alt="Shalom Cambridge International School" class="brand-badge" />
           <div class="brand-text">
             <div class="brand-name">Shalom Cambridge International School</div>
             <div class="brand-subtitle">Learner Release Security Console</div>
@@ -42,7 +56,7 @@
             <span class="icon-sun" aria-hidden="true">☀️</span>
             <span class="icon-moon" aria-hidden="true">🌙</span>
           </button>
-          <span class="user-pill" id="admin-user-label">Logged in</span>
+          <span class="user-pill" id="admin-user-label">Checking session…</span>
           <button type="button" class="btn-logout" id="admin-logout-btn">Logout</button>
         </div>
       </header>

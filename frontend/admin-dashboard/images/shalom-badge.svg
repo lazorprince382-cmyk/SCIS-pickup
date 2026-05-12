@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="School badge">
+  <defs>
+    <linearGradient id="scisBadgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f2a56"/>
+      <stop offset="100%" stop-color="#1e4a8c"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="54" fill="url(#scisBadgeGrad)" stroke="#c9a227" stroke-width="3"/>
+  <text x="60" y="54" text-anchor="middle" fill="#ffffff" font-family="Georgia, 'Times New Roman', serif" font-size="15" font-weight="700">SCIS</text>
+  <text x="60" y="74" text-anchor="middle" fill="#dbe4f5" font-family="system-ui, sans-serif" font-size="8">Learner Release</text>
+</svg>
