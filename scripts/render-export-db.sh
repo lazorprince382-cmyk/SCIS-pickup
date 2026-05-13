@@ -33,13 +33,49 @@ OUT="${OUT:-${OUT_DIR}/render-${STAMP}.dump}"
 
 mkdir -p "$(dirname "${OUT}")"
 
-if ! command -v pg_dump >/dev/null 2>&1; then
-  echo "Installing postgresql-client ..."
-  apt-get update -y && apt-get install -y postgresql-client
-fi
+install_pgdg_client() {
+  local ver="$1"
+  if [[ -x "/usr/lib/postgresql/${ver}/bin/pg_dump" ]]; then
+    return 0
+  fi
+  echo "Installing PostgreSQL ${ver} client (Render uses PG ${ver}) ..."
+  apt-get update -y
+  apt-get install -y curl ca-certificates gnupg lsb-release
+  install -d /usr/share/postgresql-common/pgdg
+  curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+    https://www.postgresql.org/media/keys/ACCC4CF8.asc
+  sh -c "echo 'deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main' > /etc/apt/sources.list.d/pgdg.list"
+  apt-get update -y
+  apt-get install -y "postgresql-client-${ver}"
+}
+
+resolve_pg_dump() {
+  local required="${PG_CLIENT_VERSION:-18}"
+  if [[ -x "/usr/lib/postgresql/${required}/bin/pg_dump" ]]; then
+    echo "/usr/lib/postgresql/${required}/bin/pg_dump"
+    return
+  fi
+  if command -v "pg_dump${required}" >/dev/null 2>&1; then
+    echo "pg_dump${required}"
+    return
+  fi
+  if command -v pg_dump >/dev/null 2>&1; then
+    local dump_ver
+    dump_ver="$(pg_dump --version | awk '{print $3}' | cut -d. -f1)"
+    if [[ "${dump_ver}" -ge "${required}" ]]; then
+      echo "pg_dump"
+      return
+    fi
+  fi
+  install_pgdg_client "${required}"
+  echo "/usr/lib/postgresql/${required}/bin/pg_dump"
+}
+
+PG_DUMP_BIN="$(resolve_pg_dump)"
+echo "Using ${PG_DUMP_BIN} ($(${PG_DUMP_BIN} --version))"
 
 echo "Dumping Render database to ${OUT} ..."
-pg_dump "${RENDER_DATABASE_URL}" \
+"${PG_DUMP_BIN}" "${RENDER_DATABASE_URL}" \
   --format=custom \
   --no-owner \
   --no-acl \
