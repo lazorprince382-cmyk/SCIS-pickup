@@ -31,6 +31,11 @@ const corsOptions =
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+const certDir = path.join(__dirname, 'cert');
+const keyPath = process.env.SSL_KEY_PATH || path.join(certDir, 'key.pem');
+const certPath = process.env.SSL_CERT_PATH || path.join(certDir, 'cert.pem');
+const useHttps = fs.existsSync(keyPath) && fs.existsSync(certPath);
+
 app.use(cors(corsOptions));
 app.use(
   helmet({
@@ -49,8 +54,10 @@ app.use(
         frameSrc: ["'self'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
+        upgradeInsecureRequests: useHttps ? [] : null,
       },
     },
+    hsts: useHttps,
   })
 );
 app.use(express.json());
@@ -121,11 +128,6 @@ app.use((err, req, res, next) => {
     res.status(status).json({ code: status, message });
   }
 });
-
-const certDir = path.join(__dirname, 'cert');
-const keyPath = process.env.SSL_KEY_PATH || path.join(certDir, 'key.pem');
-const certPath = process.env.SSL_CERT_PATH || path.join(certDir, 'cert.pem');
-const useHttps = fs.existsSync(keyPath) && fs.existsSync(certPath);
 
 const server = useHttps
   ? https.createServer(
