@@ -1,0 +1,57 @@
+# Kitchen app on VPS (same server as SCIS + Ocean)
+
+## Rules so nothing gets confused
+
+| Item | SCIS | Ocean | Kitchen |
+|------|------|-------|---------|
+| Folder | `/var/www/scis/app` | `/var/www/ocean-school` | `/var/www/kitchen` |
+| Process | `systemctl scis` | `pm2 ocean-school` | `pm2 kitchen` or systemd |
+| Internal port | **4000** | **3001** | **3002** |
+| Database | `scis_db` | `ocean_school` | `kitchen_db` (new user) |
+| Uploads | `/var/www/scis/uploads/pickers` | `/var/www/ocean-school/uploads` | `/var/www/kitchen/uploads` |
+| Public URL | `/admin/`, `/teacher/` | `/`, `/admin.html` | **`/kitchen/`** only |
+
+Never share ports, databases, or `.env` files.
+
+## Public URLs (one IP)
+
+- Ocean: `http://185.214.134.41/`
+- SCIS: `http://185.214.134.41/admin/login.html`
+- Kitchen: `http://185.214.134.41/kitchen/` (after deploy)
+
+## Kitchen app requirements
+
+Build the kitchen app so **everything** uses the `/kitchen` prefix:
+
+- Pages: `/kitchen/`, `/kitchen/login.html`
+- API: `/kitchen/api/...` or `/api/kitchen/...` (pick one; nginx must match)
+- Static: `/kitchen/css/...`
+- Set `PORT=3002` in PM2/systemd
+
+## After kitchen code is on the server
+
+```bash
+# Create DB
+sudo -u postgres psql -c "CREATE USER kitchen_user WITH PASSWORD 'STRONG_PASSWORD';"
+sudo -u postgres psql -c "CREATE DATABASE kitchen_db OWNER kitchen_user;"
+
+# Start app on 3002 (example PM2)
+cd /var/www/kitchen
+npm install
+pm2 start server.js --name kitchen -- --port 3002
+pm2 save
+
+# Update nginx for all three apps
+cd /var/www/scis/app && git pull
+bash scripts/vps-install-triple-nginx.sh
+```
+
+## Best long-term (when you have a domain)
+
+Use subdomains instead of path prefixes:
+
+- `scis.yourschool.com` → 4000
+- `ocean.yourschool.com` → 3001
+- `kitchen.yourschool.com` → 3002
+
+One IP still works; nginx uses `server_name` per subdomain.
