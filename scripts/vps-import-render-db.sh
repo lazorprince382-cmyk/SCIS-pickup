@@ -44,21 +44,22 @@ systemctl stop scis || true
 
 echo "Restoring Render dump into ${DB} (this replaces existing rows) ..."
 set +e
-"${PG_RESTORE_BIN}" \
+sudo -u postgres "${PG_RESTORE_BIN}" \
   --dbname="${DB}" \
-  --username=postgres \
   --clean \
   --if-exists \
   --no-owner \
   --role="${OWNER}" \
   --verbose \
-  "${DUMP}" 2>&1 | tail -40
+  "${DUMP}" 2>&1 | tee /tmp/pg_restore-last.log | tail -40
 RESTORE_EXIT=${PIPESTATUS[0]}
 set -e
 
-if [[ "${RESTORE_EXIT}" -gt 1 ]]; then
-  echo "pg_restore failed with exit code ${RESTORE_EXIT}" >&2
-  exit "${RESTORE_EXIT}"
+if [[ "${RESTORE_EXIT}" -ne 0 ]]; then
+  echo "pg_restore exited with code ${RESTORE_EXIT} (see /tmp/pg_restore-last.log)" >&2
+  if grep -qi 'FATAL\|unsupported version' /tmp/pg_restore-last.log; then
+    exit "${RESTORE_EXIT}"
+  fi
 fi
 
 echo "Fixing ownership and sequences ..."
