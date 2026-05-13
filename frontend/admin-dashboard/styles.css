@@ -95,11 +95,10 @@ body {
 }
 
 .brand-badge {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
 }
 
 .brand-logo {
@@ -738,16 +737,15 @@ html[data-theme="dark"] body.login-page {
 
 .login-badge-wrap {
   flex-shrink: 0;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .login-badge {
-  width: 180px;
-  height: auto;
-  max-height: 180px;
+  width: 140px;
+  height: 140px;
   display: block;
   object-fit: contain;
-  object-position: center;
+  margin: 0 auto;
 }
 
 /* Glowing border wrapper: badge colors around the form */
@@ -1346,7 +1344,8 @@ html[data-theme="dark"] .btn-remove-photo {
 
 @media (max-width: 768px) {
   .login-badge {
-    width: 150px;
+    width: 120px;
+    height: 120px;
   }
   .login-option-cards {
     flex-direction: column;
