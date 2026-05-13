@@ -1,26 +1,42 @@
 #!/usr/bin/env bash
 # Dump Render Postgres for migration to VPS.
-# Run from your PC or the VPS (anywhere with pg_dump and network to Render).
 #
-# 1. Render Dashboard → Postgres (scis-db) → Connect → copy **External** Database URL
-# 2. export RENDER_DATABASE_URL='postgresql://user:pass@host/dbname'
-# 3. bash scripts/render-export-db.sh
+# Set URL one of these ways:
+#   export RENDER_DATABASE_URL='postgresql://...'
+#   echo 'postgresql://...' > scripts/render-database.url   # gitignored, VPS only
 #
-# Output: ./backups/render-YYYYMMDD-HHMMSS.dump
+# On VPS (all-in-one dump + import):
+#   bash scripts/vps-pull-and-import-render-db.sh
+#
+# On PC only (dump then scp):
+#   bash scripts/render-export-db.sh
+#   scp backups/render-*.dump root@185.214.134.41:/tmp/render.dump
 
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+URL_FILE="${ROOT}/scripts/render-database.url"
+
+if [[ -z "${RENDER_DATABASE_URL:-}" && -f "${URL_FILE}" ]]; then
+  RENDER_DATABASE_URL="$(tr -d '\r\n' < "${URL_FILE}")"
+  export RENDER_DATABASE_URL
+fi
+
 if [[ -z "${RENDER_DATABASE_URL:-}" ]]; then
-  echo "Set RENDER_DATABASE_URL to the Render **External** Database URL first."
+  echo "Set RENDER_DATABASE_URL or create scripts/render-database.url (see render-database.url.example)."
   exit 1
 fi
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT_DIR="${ROOT}/backups"
 STAMP="$(date +%Y%m%d-%H%M%S)"
-OUT="${OUT_DIR}/render-${STAMP}.dump"
+OUT="${OUT:-${OUT_DIR}/render-${STAMP}.dump}"
 
-mkdir -p "${OUT_DIR}"
+mkdir -p "$(dirname "${OUT}")"
+
+if ! command -v pg_dump >/dev/null 2>&1; then
+  echo "Installing postgresql-client ..."
+  apt-get update -y && apt-get install -y postgresql-client
+fi
 
 echo "Dumping Render database to ${OUT} ..."
 pg_dump "${RENDER_DATABASE_URL}" \
@@ -31,4 +47,6 @@ pg_dump "${RENDER_DATABASE_URL}" \
   --file="${OUT}"
 
 echo "Done. Size: $(du -h "${OUT}" | cut -f1)"
-echo "Copy to VPS: scp \"${OUT}\" root@185.214.134.41:/tmp/render.dump"
+if [[ "${OUT}" != /tmp/render.dump ]]; then
+  echo "Copy to VPS: scp \"${OUT}\" root@185.214.134.41:/tmp/render.dump"
+fi
