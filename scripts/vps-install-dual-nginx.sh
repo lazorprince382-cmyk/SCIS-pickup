@@ -1,28 +1,16 @@
 # Run both apps on one VPS (same IP, port 80).
 #
 # SCIS pickup  -> 127.0.0.1:4000  (/admin/, /teacher/, /uploads/pickers/, SCIS /api/...)
-# Ocean school -> 127.0.0.1:3000  (everything else: /, /admin.html, Ocean /api/...)
+# Ocean school -> 127.0.0.1:3001  (PM2 ocean-school — everything else)
 #
 # On VPS:
-#   export OCEAN_PORT=3000    # change if your Ocean app uses another port
+#   export OCEAN_PORT=3001
 #   bash scripts/vps-install-dual-nginx.sh
 
 set -euo pipefail
 
 SCIS_PORT="${SCIS_PORT:-4000}"
-OCEAN_PORT="${OCEAN_PORT:-}"
-
-if [[ -z "${OCEAN_PORT}" ]]; then
-  # First listening node port that is not SCIS
-  OCEAN_PORT="$(ss -tlnp 2>/dev/null | grep -oE ':[0-9]+' | tr -d ':' | sort -nu | grep -v "^${SCIS_PORT}$" | head -1 || true)"
-fi
-
-if [[ -z "${OCEAN_PORT}" ]]; then
-  echo "Could not detect Ocean port. Set it manually, e.g.:"
-  echo "  export OCEAN_PORT=3000"
-  echo "  ss -tlnp | grep node"
-  exit 1
-fi
+OCEAN_PORT="${OCEAN_PORT:-3001}"
 
 echo "SCIS port: ${SCIS_PORT}"
 echo "Ocean port: ${OCEAN_PORT}"
@@ -88,7 +76,9 @@ server {
 NGINX
 
 ln -sf "${CONF}" "${ENABLED}"
-rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/scis 2>/dev/null || true
+rm -f /etc/nginx/sites-enabled/default \
+  /etc/nginx/sites-enabled/scis \
+  /etc/nginx/sites-enabled/ocean-school 2>/dev/null || true
 
 nginx -t
 systemctl reload nginx
