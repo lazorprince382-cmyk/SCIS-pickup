@@ -1,0 +1,29 @@
+# Copy to /etc/systemd/system/scis.service (adjust paths if needed)
+# Then: systemctl daemon-reload && systemctl enable scis && systemctl start scis
+#
+# Auto-restart like Render: Restart=always
+
+[Unit]
+Description=SCIS learner release backend
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/scis/app/backend
+EnvironmentFile=/var/www/scis/app/backend/.env
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=5
+StartLimitIntervalSec=0
+
+# Soft resource guard (optional — tune for your VPS)
+MemoryMax=768M
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=scis
+
+[Install]
+WantedBy=multi-user.target
